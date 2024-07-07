@@ -1,3 +1,4 @@
+from sys import argv
 import numpy
 
 try:
@@ -12,7 +13,7 @@ try:
 except Exception as e:
     print(f"Error loading Whisper model: {e}")
 
-file_path = '/app/assets/audio/greeting.mp3'
+file_path = argv[1]
 wav_file_path = convert_to_wav(file_path)
 
 

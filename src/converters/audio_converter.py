@@ -14,6 +14,8 @@ def convert_to_wav(file_path):
             audio = AudioSegment.from_ogg(file_path)
         elif file_ext == ".flac":
             audio = AudioSegment.from_file(file_path, "flac")
+        elif file_ext == ".aac":
+            audio = AudioSegment.from_file(file_path, "aac")
         else:
             print(f"Unsupported file format: {file_ext}")
             return None

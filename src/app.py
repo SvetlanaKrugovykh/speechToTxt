@@ -1,5 +1,6 @@
 # app.py
 from flask import Flask
+import debugpy
 import os
 
 def create_app():
@@ -14,5 +15,9 @@ def create_app():
     return app
 
 if __name__ == "__main__":
+    debugpy.listen(("0.0.0.0", 5678))
+    print("Waiting for debugger attach...")
+    debugpy.wait_for_client()
+
     app = create_app()
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)

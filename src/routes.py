@@ -1,7 +1,6 @@
-# routes.py
-
 from flask import Blueprint, request, jsonify
 import os
+import io
 
 main = Blueprint('main', __name__)
 
@@ -38,9 +37,9 @@ def upload_audio():
         filename = generate_filename(segment_number)        
         filepath = os.path.join('uploads', filename)
         file.save(filepath)
-        transcription, error = transcribe_audio(filepath)  # Unpack the tuple
+        transcription, error = transcribe_audio(filepath)  
+        print(f"Transcription: {transcription}")
         if transcription:
             return jsonify({'message': f'File {filename} uploaded and transcribed successfully', 'transcription': transcription}), 200
         else:
-            # Include the error message in the response
             return jsonify({'error': 'Failed to transcribe audio', 'reason': error}), 500

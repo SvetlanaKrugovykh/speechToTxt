@@ -2,21 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "debugpy",
-      "request": "launch",
-      "name": "Launch Python",
-      // "program": "${workspaceFolder}/src/__init__.py",
-      "program": "${workspaceFolder}/src/whisper_server.py",
-      "console": "integratedTerminal",
-      "justMyCode": true,
-      "stopOnEntry": true
-    },
-    {
-      "name": "Python: test_sip_client.py",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/src/python/tests/test_sip_client.py",
-      "console": "integratedTerminal"
+      "name": "Python: Attach to Docker",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app"
+        }
+      ]
     }
   ]
 }

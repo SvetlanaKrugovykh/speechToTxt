@@ -1,6 +1,5 @@
 # app.py
 from flask import Flask
-import debugpy
 import os
 
 def create_app():
@@ -15,9 +14,21 @@ def create_app():
     return app
 
 if __name__ == "__main__":
-    debugpy.listen(("0.0.0.0", 5678))
-    print("Waiting for debugger attach...")
-    debugpy.wait_for_client()
-
     app = create_app()
-    app.run(host='0.0.0.0', debug=True)
+    port = int(os.getenv('FLASK_RUN_PORT', '8338'))
+    cert_path = os.getenv('CERT_PATH')
+    key_path = os.getenv('KEY_PATH')
+    test_cert_path_exist =  os.path.exists(cert_path)
+    test_key_path_exist = os.path.exists(key_path)
+    
+    print(f"Starting server on port {port}")
+    print(f"SSL Cert Path: {cert_path}")
+    print(f"SSL Key Path: {key_path}")
+    print(f"Test Cert Path Exist: {test_cert_path_exist}")
+    print(f"Test Key Path Exist: {test_key_path_exist}")
+
+    if cert_path and key_path:
+        app.run(ssl_context=(cert_path, key_path), host='0.0.0.0', port=port, debug=False)
+    else:
+        print("Error: SSL certificates not found or paths not set.")
+        app.run(host='0.0.0.0', port=port, debug=False)

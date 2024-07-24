@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import os
-import io
+import sys
 
 main = Blueprint('main', __name__)
 
@@ -38,7 +38,9 @@ def upload_audio():
         filepath = os.path.join('uploads', filename)
         file.save(filepath)
         transcription, error = transcribe_audio(filepath)  
-        print(f"Transcription: {transcription}")
+        sys.stdout.reconfigure(encoding='utf-8')
+        print(f'File {filename}, Transcription: {transcription}')
+        os.remove(filepath)
         if transcription:
             return jsonify({'message': f'File {filename} uploaded and transcribed successfully', 'transcription': transcription}), 200
         else:

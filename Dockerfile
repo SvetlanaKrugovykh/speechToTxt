@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
+# Copy certificates into the container
+COPY certs /app/certs
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
@@ -17,14 +20,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 ENV FLASK_APP=src.app:create_app
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_ENV=development
+ENV FLASK_RUN_PORT=8338
+ENV CERT_PATH=/app/certs/cert.pem
+ENV KEY_PATH=/app/certs/key.pem
 
-EXPOSE 5000
-EXPOSE 5678
+EXPOSE 8338
 # Define the PYTHONPATH environment variable to include /app
 ENV PYTHONPATH="/app"
 
 # Run the whisper_server.py script
-# CMD ["python", "src/whisper_server.py"]
-# CMD ["flask", "run", "--no-debugger", "--no-reload"]
-CMD ["flask", "run"]
+#CMD ["flask", "run", "--no-debugger", "--no-reload", "--port", "8338", "--cert", "/app/certs/cert.pem", "--key", "/app/certs/key.pem"]
+CMD ["flask", "run", "--no-debugger", "--no-reload", "--port", "8338", "--cert", "/app/certs/cert.pem", "--key", "/app/certs/key.pem"]

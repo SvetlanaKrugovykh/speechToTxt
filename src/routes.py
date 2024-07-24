@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 import os
 import sys
+import requests
 
 main = Blueprint('main', __name__)
 
@@ -11,9 +12,9 @@ except ImportError:
 
 from .converters.audio_converter import convert_to_wav
 
-def generate_filename(segment_number):
+def generate_filename(segment_number, userId=""):
     segment_name = os.getenv('SEGMENT_NAME', 'segment')
-    return f"{segment_name}_{segment_number}.wav"
+    return f"{userId}_{segment_name}_{segment_number}.wav"
     
 def transcribe_audio(file_path):
     try:
@@ -27,6 +28,20 @@ def transcribe_audio(file_path):
 
 @main.route('/upload', methods=['POST'])
 def upload_audio():
+    userId = ""
+    if int(os.getenv('CHECK_AUTHORIZATION', '0')) == 1:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'Authorization header missing'}), 401
+        
+        auth_url = os.getenv('AUTH_URL')
+        auth_response = requests.post(auth_url, headers={'Authorization': auth_header, 'Content-Type': 'application/json'}, json={'token': auth_header})
+        
+        if auth_response.status_code != 200 or not auth_response.json().get('valid') or not auth_response.json().get('data'):
+            return jsonify({'error': 'Authorization failed'}), 401
+        
+        userId = auth_response.json().get('data').get('userId', '')
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
@@ -34,12 +49,15 @@ def upload_audio():
         return jsonify({'error': 'No selected file'}), 400
     if file:
         segment_number = request.form.get('segment', 'unknown')
-        filename = generate_filename(segment_number)        
+        filename = generate_filename(segment_number, userId)        
         filepath = os.path.join('uploads', filename)
         file.save(filepath)
         transcription, error = transcribe_audio(filepath)  
-        sys.stdout.reconfigure(encoding='utf-8')
-        print(f'File {filename}, Transcription: {transcription}')
+        
+        if int(os.getenv('TRANSCRIPTION_OUT_LOG', '0')) == 1:
+            sys.stdout.reconfigure(encoding='utf-8')
+            print(f'File {filename}, Transcription: {transcription}')
+        
         os.remove(filepath)
         if transcription:
             return jsonify({'message': f'File {filename} uploaded and transcribed successfully', 'transcription': transcription}), 200

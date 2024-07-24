@@ -18,11 +18,17 @@ RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+ARG ENV_FILE
+COPY ${ENV_FILE} /app/env
+
 ENV FLASK_APP=src.app:create_app
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8338
 ENV CERT_PATH=/app/certs/cert.pem
 ENV KEY_PATH=/app/certs/key.pem
+ENV CHECK_AUTHORIZATION=0
+ENV TRANSCRIPTION_OUT_LOG=1
+ENV AUTH_URL="https://127.0.0.1:8765/api/auth/check-access-token/"
 
 EXPOSE 8338
 # Define the PYTHONPATH environment variable to include /app

@@ -3,3 +3,4 @@ openai-whisper
 pydub
 flask
 debugpy
+python-dotenv

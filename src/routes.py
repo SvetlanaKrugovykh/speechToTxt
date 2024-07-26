@@ -1,9 +1,14 @@
 from flask import Blueprint, request, jsonify
+import requests
 import os
 import re
 import sys
+import json
+import ssl
 import urllib3
-import requests
+from requests.adapters import HTTPAdapter
+from urllib3.poolmanager import PoolManager
+from urllib3.util.ssl_ import create_urllib3_context
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -16,35 +21,65 @@ except ImportError:
 
 from .converters.audio_converter import convert_to_wav
 
+class SSLContextAdapter(HTTPAdapter):
+    def __init__(self, ssl_context=None, **kwargs):
+        self.ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs['ssl_context'] = self.ssl_context
+        return super().init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs['ssl_context'] = self.ssl_context
+        return super().proxy_manager_for(*args, **kwargs)
+
 def check_authorization():
     auth_header = request.headers.get('Authorization')
     if not auth_header:
         return None, jsonify({'error': 'Authorization header missing'}), 401
 
     auth_url = os.getenv('AUTH_URL')
-    auth_response = requests.post(
-        auth_url,
-        headers={'Authorization': auth_header, 'Content-Type': 'application/json'},
-        json={'token': auth_header},
-        verify=False
-    )
+    if not auth_url:
+        return None, jsonify({'error': 'Authorization URL not set'}), 500
 
-    if auth_response.status_code != 200:
-        return None, jsonify({'error': 'Authorization failed'}), 401
+    ssl_context = create_urllib3_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
+    session = requests.Session()
+    adapter = SSLContextAdapter(ssl_context)
+    session.mount('https://', adapter)   
+
+    try:
+        auth_response = session.post(
+            auth_url,
+            headers={'Authorization': auth_header, 'Content-Type': 'application/json'},
+            json={'token': auth_header},
+            verify=False 
+        )
+        auth_response.raise_for_status()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None, json.dumps({'error': 'Authorization failed'}), 401
+    except requests.exceptions.RequestException as req_err:
+        print(f"Error during requests to {auth_url}: {req_err}")
+        return None, json.dumps({'error': 'Authorization request failed'}), 500
 
     try:
         auth_data = auth_response.json()
     except ValueError:
-        return None, jsonify({'error': 'Invalid JSON response from authorization server'}), 500
+        return None, json.dumps({'error': 'Invalid JSON response from authorization server'}), 500
 
     if not isinstance(auth_data, dict) or not auth_data.get('decodedToken'):
         print('Authorization failed')
-        return None, jsonify({'error': 'Authorization failed'}), 401
+        return None, json.dumps({'error': 'Authorization failed'}), 401
 
     decoded_token = auth_data['decodedToken']
     user_id = decoded_token['clientId']
     user_id = re.sub(r'[<>:"/\\|?*]', '_', user_id)
-    return user_id, None, None
+    print(f"User ID: {user_id}")
+    return auth_data.get('user_id'), None, 200
 
 def handle_file_upload(user_id):
     if 'file' not in request.files:

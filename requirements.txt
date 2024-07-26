@@ -4,3 +4,5 @@ pydub
 flask
 debugpy
 python-dotenv
+requests
+urllib3

@@ -46,5 +46,3 @@ def transcribe_audio(file_path):
         print(f"Error in audio transcription: {e}")
         return None, str(e)
     
-print("Whisper module loaded successfully.")
-print("Pydub module loaded successfully.")    

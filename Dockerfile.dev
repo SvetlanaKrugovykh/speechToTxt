@@ -26,7 +26,6 @@ ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8338
 ENV CERT_PATH=/app/certs/cert.pem
 ENV KEY_PATH=/app/certs/key.pem
-ENV CHECK_AUTHORIZATION=0
 ENV TRANSCRIPTION_OUT_LOG=1
 ENV AUTH_URL="https://127.0.0.1:8765/api/auth/check-access-token/"
 

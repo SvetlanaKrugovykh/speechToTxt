@@ -1,8 +1,1 @@
-numpy==2.0.0
-openai-whisper
-pydub
-flask
-debugpy
-python-dotenv
-requests
-urllib3
+

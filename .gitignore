@@ -1,3 +1,4 @@
+# .gitignore
 keys
 data
 path
@@ -16,3 +17,7 @@ uploads
 certs
 env*
 Dockerfile.prod
+form_old_src
+__pycache__
+*.pyc
+

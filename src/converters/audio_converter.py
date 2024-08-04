@@ -6,7 +6,6 @@ def convert_to_wav(file_path):
     file_ext = os.path.splitext(file_path)[1].lower()
     output_file_path = os.path.splitext(file_path)[0] + ".wav"
     if file_ext == ".wav":
-        print("File is already in WAV format.")
         return file_path
     try:
         if file_ext == ".mp3":

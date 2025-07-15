@@ -116,18 +116,29 @@ class BatchAudioProcessor:
         try:
             self.logger.info(f"Processing file: {audio_file_path}")
             
-            # Audio transcription
-            transcription = transcribe_audio(audio_file_path)
+            # Audio transcription - returns (text, error)
+            result = transcribe_audio(audio_file_path)
             
-            if transcription:
+            # Handle the tuple return value
+            if isinstance(result, tuple):
+                transcription, error = result
+                if error:
+                    self.logger.error(f"Transcription error for {audio_file_path}: {error}")
+                    return False
+            else:
+                # If it's not a tuple, assume it's the transcription text
+                transcription = result
+            
+            if transcription and transcription.strip():
                 self.save_transcription(audio_file_path, transcription, save_mode)
                 return True
             else:
-                self.logger.error(f"Failed to transcribe: {audio_file_path}")
+                self.logger.error(f"Empty transcription for: {audio_file_path}")
                 return False
                 
         except Exception as e:
             self.logger.error(f"Error processing {audio_file_path}: {e}")
+            return False
             return False
     
     def process_all_files(self, save_mode='individual'):

@@ -57,6 +57,17 @@
         "PYTHONPATH": "${workspaceFolder}",
         "SAVE_MODE": "combined"
       }
+    },
+    {
+      "name": "Python: Direct Audio Processing",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/process_direct.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
     }
   ]
 }

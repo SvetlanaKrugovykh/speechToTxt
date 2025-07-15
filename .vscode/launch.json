@@ -11,6 +11,52 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
       }
+    },
+    {
+      "name": "Python: Batch Audio Processing",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_batch.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Python: Test Batch Processing",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/test_batch.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Python: Batch Processing (Individual Files)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_batch.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "SAVE_MODE": "individual"
+      }
+    },
+    {
+      "name": "Python: Batch Processing (Combined File)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_batch.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "SAVE_MODE": "combined"
+      }
     }
   ]
 }

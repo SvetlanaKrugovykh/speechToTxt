@@ -20,4 +20,4 @@ Dockerfile.prod
 form_old_src
 __pycache__
 *.pyc
-
+output

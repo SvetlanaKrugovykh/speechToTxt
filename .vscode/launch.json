@@ -66,7 +66,20 @@
       "console": "integratedTerminal",
       "justMyCode": true,
       "env": {
-        "PYTHONPATH": "${workspaceFolder}"
+        "PYTHONPATH": "${workspaceFolder}",
+        "KMP_DUPLICATE_LIB_OK": "TRUE"
+      }
+    },
+    {
+      "name": "EXPERIMENTAL: Test Faster-Whisper",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/test_faster_whisper.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "KMP_DUPLICATE_LIB_OK": "TRUE"
       }
     }
   ]

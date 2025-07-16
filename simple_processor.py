@@ -9,6 +9,15 @@ import sys
 import glob
 import time
 
+# Try to load .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ .env file loaded")
+except ImportError:
+    print("⚠️  python-dotenv not installed (optional)")
+    # Continue without .env support
+
 # Try to import faster-whisper
 try:
     from faster_whisper import WhisperModel
@@ -117,13 +126,24 @@ if __name__ == "__main__":
         source_dir = sys.argv[1]
         output_dir = sys.argv[2] if len(sys.argv) > 2 else "./output"
     else:
-        source_dir = input("📁 Enter audio folder path: ").strip()
-        if not source_dir:
-            print("❌ Source directory required")
-            sys.exit(1)
-        output_dir = input("📁 Enter output folder [./output]: ").strip()
+        # Try to get from .env file first
+        source_dir = os.getenv('AUDIO_SOURCE_DIR')
+        if source_dir:
+            print(f"📁 Using source from .env: {source_dir}")
+        else:
+            source_dir = input("📁 Enter audio folder path: ").strip()
+            if not source_dir:
+                print("❌ Source directory required")
+                sys.exit(1)
+        
+        # Get output directory (with .env support)
+        output_dir = os.getenv('OUTPUT_DIR')
         if not output_dir:
-            output_dir = "./output"
+            output_dir = input("📁 Enter output folder [./output]: ").strip()
+            if not output_dir:
+                output_dir = "./output"
+        else:
+            print(f"📁 Using output from .env: {output_dir}")
     
     # Process
     process_folder(source_dir, output_dir)

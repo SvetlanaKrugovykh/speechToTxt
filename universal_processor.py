@@ -12,6 +12,15 @@ import glob
 import time
 from pathlib import Path
 
+# Try to load .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ .env file loaded")
+except ImportError:
+    print("⚠️  python-dotenv not installed (optional)")
+    # Continue without .env support
+
 # Try to import required libraries
 try:
     from faster_whisper import WhisperModel
@@ -242,15 +251,32 @@ if __name__ == "__main__":
         
         processor = UniversalProcessor()
         
-        # Get source directory
-        source_dir = input("📁 Enter source directory: ").strip()
-        if not source_dir:
-            source_dir = r'D:\02_Проекты\LK-TRANS\2025\AI\AUDIO'  # Default
+        # Get source directory from .env or user input
+        source_dir = os.getenv('AUDIO_SOURCE_DIR')
+        if source_dir:
+            print(f"📁 Using source from .env: {source_dir}")
+        else:
+            source_dir = input("📁 Enter source directory: ").strip()
+            if not source_dir:
+                source_dir = r'D:\02_Проекты\LK-TRANS\2025\AI\AUDIO'  # Default
+        
+        # Get output directory from .env or user input
+        output_dir = os.getenv('OUTPUT_DIR')
+        if not output_dir:
+            output_dir = input("📁 Enter output directory [./output]: ").strip()
+            if not output_dir:
+                output_dir = "./output"
+        else:
+            print(f"📁 Using output from .env: {output_dir}")
         
         # Get model size
-        model_size = input("🧠 Model size (tiny/base/small/medium/large) [small]: ").strip()
+        model_size = os.getenv('MODEL_SIZE')
         if not model_size:
-            model_size = "small"
+            model_size = input("🧠 Model size (tiny/base/small/medium/large) [small]: ").strip()
+            if not model_size:
+                model_size = "small"
+        else:
+            print(f"🧠 Using model from .env: {model_size}")
         
         # Run processing
-        processor.process_batch(source_dir, model_size=model_size)
+        processor.process_batch(source_dir, output_dir, model_size)

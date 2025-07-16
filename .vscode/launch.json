@@ -81,6 +81,42 @@
         "PYTHONPATH": "${workspaceFolder}",
         "KMP_DUPLICATE_LIB_OK": "TRUE"
       }
+    },
+    {
+      "name": "TEST: Colab Batch Processor (Local)",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/colab_batch_processor.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "KMP_DUPLICATE_LIB_OK": "TRUE"
+      }
+    },
+    {
+      "name": "UNIVERSAL: Cross-Platform Processor",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/universal_processor.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "KMP_DUPLICATE_LIB_OK": "TRUE"
+      }
+    },
+    {
+      "name": "SIMPLE: Easy Audio Processor",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/simple_processor.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "KMP_DUPLICATE_LIB_OK": "TRUE"
+      }
     }
   ]
 }

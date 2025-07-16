@@ -4,11 +4,11 @@ from faster_whisper import WhisperModel
 def transcribe_audio_fast(file_path):
     try:
         # Load model once (can be moved to __init__)
-        #model = WhisperModel("small", device="cpu", compute_type="int8")  #for speed, use "float32" for quality
+        model = WhisperModel("small", device="cpu", compute_type="int8")  #for speed, use "float32" for quality
 
         # model = WhisperModel("small", device="cpu", compute_type="float32")  #for quality, use "int8" for speed
-        # Версия для тестирования base + int8
-        model = WhisperModel("base", device="cpu", compute_type="int8")  # Best balance: quality + speed
+        
+        #model = WhisperModel("base", device="cpu", compute_type="int8")  # Best balance: quality + speed
 
         # Transcription with settings optimized for mixed languages
         segments, info = model.transcribe(

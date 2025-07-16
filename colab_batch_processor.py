@@ -19,6 +19,15 @@ except ImportError:
     print("faster-whisper not installed. Install with: !pip install faster-whisper")
     FASTER_WHISPER_AVAILABLE = False
 
+# Try to load .env file for GOOGLE_DRIVE_PATH
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ .env file loaded")
+except ImportError:
+    print("⚠️  python-dotenv not installed (optional)")
+    # Continue without .env support
+
 # Global model instance for Colab (load once, use many times)
 _colab_model = None
 
@@ -90,16 +99,20 @@ def transcribe_audio_colab(file_path, device="cuda", compute_type="float16"):
     except Exception as e:
         return None, str(e)
 
-def process_batch_colab(source_dir, output_dir=None):
+def process_batch_colab(source_dir=None, output_dir=None):
     """Process batch of audio files in Google Colab"""
-    
     if not FASTER_WHISPER_AVAILABLE:
         print("❌ Install faster-whisper first: !pip install faster-whisper")
         return
-    
+
+    # Use GOOGLE_DRIVE_PATH from .env if source_dir not provided
+    if source_dir is None:
+        source_dir = os.getenv('GOOGLE_DRIVE_PATH', '/content/drive/MyDrive/audio_files')
+        print(f"📁 Using GOOGLE_DRIVE_PATH: {source_dir}")
+
     # Setup Colab environment
     IN_COLAB, device, compute_type = setup_colab_environment()
-    
+
     if output_dir is None:
         output_dir = "/content/output"  # Default Colab output
     

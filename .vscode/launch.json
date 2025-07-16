@@ -117,6 +117,18 @@
         "PYTHONPATH": "${workspaceFolder}",
         "KMP_DUPLICATE_LIB_OK": "TRUE"
       }
+    },
+    {
+      "name": "FETCH: Colab Output Files",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/colab_result_fetcher.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "KMP_DUPLICATE_LIB_OK": "TRUE"
+      }
     }
   ]
 }

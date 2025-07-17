@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Colab Result Fetcher
-- Monitors new files in the output folder on Google Drive
-- Downloads them to the local output directory
+- Downloads all files from the specified Google Drive output folder (by ID)
+- Saves them to the local output directory
 - Logs the start and end time of the transfer
 - Preserves file names as in Colab
 """
@@ -17,8 +17,10 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from google.oauth2 import service_account
 
+
 # Settings
-GOOGLE_DRIVE_OUTPUT_PATH = os.getenv('GOOGLE_DRIVE_OUTPUT_PATH', 'output')  # Output folder on Google Drive
+GOOGLE_DRIVE_OUTPUT_FOLDER_ID = os.getenv('GOOGLE_DRIVE_OUTPUT_FOLDER_ID')  # Output folder ID for results
+GOOGLE_DRIVE_AUDIO_FOLDER_ID = os.getenv('GOOGLE_DRIVE_AUDIO_FOLDER_ID')    # (Optional) Input audio folder ID
 LOCAL_OUTPUT_PATH = os.getenv('OUTPUT_DIR', './output')  # Local output folder
 SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_SERVICE_ACCOUNT', 'service_account.json')  # Service account JSON key
 SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -29,18 +31,10 @@ def get_drive_service():
     service = build('drive', 'v3', credentials=creds)
     return service
 
-def get_folder_id(service, folder_name):
-    results = service.files().list(q=f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder'",
-                                   spaces='drive', fields='files(id, name)').execute()
-    items = results.get('files', [])
-    if not items:
-        print(f"❌ Folder '{folder_name}' not found on Google Drive!")
-        return None
-    return items[0]['id']
-
 def list_files_in_folder(service, folder_id):
     query = f"'{folder_id}' in parents and trashed=false"
-    results = service.files().list(q=query, fields='files(id, name, modifiedTime)').execute()
+    # Also get mimeType to skip Google Docs files
+    results = service.files().list(q=query, fields='files(id, name, modifiedTime, mimeType)').execute()
     return results.get('files', [])
 
 def download_file(service, file_id, file_name, local_path):
@@ -54,25 +48,44 @@ def download_file(service, file_id, file_name, local_path):
     fh.close()
     print(f"✅ Downloaded: {file_name}")
 
+
+
 def fetch_colab_results():
     print("🚀 Starting Colab Result Fetcher...")
     start_time = datetime.now()
     print(f"⏱️ Start: {start_time}")
 
-    service = get_drive_service()
-    folder_id = get_folder_id(service, GOOGLE_DRIVE_OUTPUT_PATH)
-    if not folder_id:
+    if not GOOGLE_DRIVE_OUTPUT_FOLDER_ID:
+        print("❌ GOOGLE_DRIVE_OUTPUT_FOLDER_ID is not set in the environment!")
         return
+
+    service = get_drive_service()
+    folder_id = GOOGLE_DRIVE_OUTPUT_FOLDER_ID
 
     Path(LOCAL_OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
 
     already_downloaded = set()
-    print(f"📁 Monitoring Google Drive folder: {GOOGLE_DRIVE_OUTPUT_PATH}")
+    print(f"📁 Monitoring Google Drive output folder ID: {folder_id}")
     print(f"📂 Local output: {LOCAL_OUTPUT_PATH}")
 
+    # Wait for all 24 files to appear in the output folder
+    print("🔎 Waiting for all expected files to appear in Google Drive output folder...")
     while True:
         files = list_files_in_folder(service, folder_id)
-        new_files = [f for f in files if f['name'] not in already_downloaded]
+        ready_files = [f for f in files if not f['mimeType'].startswith('application/vnd.google-apps.')]
+        if len(ready_files) >= 24:
+            colab_finish_time = datetime.now()
+            print(f"✅ All expected files found in Google Drive output folder at: {colab_finish_time}")
+            print(f"⏳ Time from start to all files ready: {colab_finish_time - start_time}")
+            break
+        else:
+            print(f"⏳ Waiting... {len(ready_files)}/24 files present.")
+        time.sleep(30)
+
+    # Now download all files
+    while True:
+        files = list_files_in_folder(service, folder_id)
+        new_files = [f for f in files if f['name'] not in already_downloaded and not f['mimeType'].startswith('application/vnd.google-apps.')]
         if new_files:
             for f in new_files:
                 download_file(service, f['id'], f['name'], LOCAL_OUTPUT_PATH)
